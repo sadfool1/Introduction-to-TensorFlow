@@ -45,11 +45,20 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
-model.fit(training_images, training_labels, epochs = 5)
+#model.fit(training_images, training_labels, epochs = 5)
 
 #model.evaluate(test_images, test_labels) #now evaluate unforeseen data
 
 test_loss, test_acc = model.evaluate(test_images,  test_labels, verbose=2)
 
-print('\nTest accuracy:', test_acc)
+#CALL BACK FUNC to stop when desired accurcy hits. In this case loss < 0.1 means we are looking for 90% accuracy.
+class myCallback(tf.keras.callbacks.Callback):
+  def on_epoch_end(self, epoch, logs={}):
+    if(logs.get('loss')<0.1):
+      print("\nReached 90% accuracy so cancelling training!")
+      self.model.stop_training = True
+
+callbacks = myCallback()
+model.fit(training_images, training_labels, epochs=15, callbacks=[callbacks])
+
 
